@@ -52,7 +52,7 @@ class GTZANDataset(Dataset):
         audio, sample_rate = torchaudio.load(path)
         # print(audio.shape[1])
         audio = audio[
-            0, split * self.n * sample_rate : (split + 1) * self.n * sample_rate
+            :, split * self.n * sample_rate : (split + 1) * self.n * sample_rate
         ]
         if self.transforms:
             audio = self.transforms(audio)

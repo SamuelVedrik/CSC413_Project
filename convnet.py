@@ -1,9 +1,10 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import torch
 from torchaudio.transforms import MelSpectrogram
 from dataset import build_datasets, GTZANDataset
 from torch.utils.data import DataLoader
-from tqdm.tqdm import tqdm
+from tqdm.auto import tqdm
 
 
 class Layer(nn.Module):
@@ -19,7 +20,7 @@ class Layer(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2)
 
     def forward(self, x):
-        x = self.conv1(x)
+        x = self.conv(x)
         x = self.bnorm(x)
         x = self.relu(x)
         x = self.pool(x)
@@ -63,12 +64,12 @@ if __name__ == "__main__":
 
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32)
 
-    net = Net()
+    net = Net(1, len(train_dataset.classes))
     criterion = nn.CrossEntropyLoss()
     # BCELossWithLogits (Multi Label classification)
 
     # SGD, Adam, AdamW
-    optimizer = nn.optim.Adam(net.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 
     # weight = weight - (lr * gradient) 
     EPOCHS = 10
@@ -77,6 +78,8 @@ if __name__ == "__main__":
         running_loss = 0
         for batch in tqdm(train_dataloader):
             X, y = batch
+            # X = X.unsqueeze(1)
+            print(X.shape)
             y_pred = net(X)
             loss = criterion(y_pred, y)
             optimizer.zero_grad()
