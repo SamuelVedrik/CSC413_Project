@@ -55,14 +55,14 @@ class GTZANDataset(Dataset):
     def __getitem__(self, idx):
         file_idx, split = idx // self.samples_per_file, idx % self.samples_per_file
         path, class_ = self.files_df.iloc[file_idx]
-        # audio, sample_rate = torchaudio.load(path)
+
         audio, sample_rate = librosa.load(path, duration=30.0)
-        # print(audio.shape[1])
+
         audio = audio[
             split * self.n * sample_rate : (split + 1) * self.n * sample_rate
         ]
         melspectrogram = self.convert_to_melspectrogram(audio, sample_rate, **self.spectrogram_opts)
-        melspectrogram = torch.FloatTensor(melspectrogram)
+        melspectrogram = torch.FloatTensor(melspectrogram).unsqueeze(0)
         return melspectrogram, self.class_to_idx[class_]
 
         

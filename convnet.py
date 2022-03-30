@@ -57,6 +57,9 @@ class Net(nn.Module):
 
 if __name__ == "__main__":
     mel_opts= dict(n_fft=800, n_mels=128)
+    # Set device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     train_dataset, valid_dataset, test_dataset = build_datasets(root="genres",
                                                                 num_seconds_per_sample=5,
                                                                 mel_opts=mel_opts)
@@ -74,9 +77,11 @@ if __name__ == "__main__":
     
     for epoch in range(EPOCHS):
         running_loss = 0
-        for X, y in tqdm(train_dataloader):
-            y_pred = net(X)
-            loss = criterion(y_pred, y)
+        for spectrograms, target in tqdm(train_dataloader):
+            spectrograms = spectrograms.to(device)
+            target = target.to(device)
+            pred = net(spectrograms)
+            loss = criterion(pred, target)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
