@@ -5,6 +5,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import math
 
+
 def build_datasets(root="genres", num_seconds_per_sample=5, transforms=None):
     classes = [
         genre for genre in os.listdir(root) if os.path.isdir(os.path.join(root, genre))
@@ -35,22 +36,24 @@ class GTZANDataset(Dataset):
     def __init__(self, files_df, num_seconds_per_sample, transforms):
         self.files_df = files_df
         self.n = num_seconds_per_sample
-        
+
         # Each audio sample is 30 seconds long. This is the number of samples created from one audio file
-        # given that each sample is n seconds long. 
+        # given that each sample is n seconds long.
         # We discard the last one in case it does not contain n seconds long of audio.
         self.samples_per_file = math.ceil(30 // num_seconds_per_sample) - 1
         self.transforms = transforms
-        
+
         self.classes = files_df["class"].unique()
         self.class_to_idx = {class_: idx for idx, class_ in enumerate(self.classes)}
-        
+
     def __getitem__(self, idx):
         file_idx, split = idx // self.samples_per_file, idx % self.samples_per_file
         path, class_ = self.files_df.iloc[file_idx]
         audio, sample_rate = torchaudio.load(path)
         # print(audio.shape[1])
-        audio = audio[0, split * self.n * sample_rate:(split+1) * self.n * sample_rate]
+        audio = audio[
+            0, split * self.n * sample_rate : (split + 1) * self.n * sample_rate
+        ]
         if self.transforms:
             audio = self.transforms(audio)
         return audio, self.class_to_idx[class_]
