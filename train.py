@@ -15,7 +15,7 @@ if __name__ == "__main__":
                                                                 mel_opts=mel_opts)
     
     
-    normalizer = get_normalizer(train_dataset)
+    normalizer = get_normalizer()
     print(f"Dataset Sizes: Train {len(train_dataset)} | Validation {len(valid_dataset)} | Test {len(test_dataset)}")
 
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32)

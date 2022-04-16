@@ -35,13 +35,16 @@ def build_datasets(root="genres", num_seconds_per_sample=5, mel_opts=None):
         GTZANDataset(test_data, num_seconds_per_sample, mel_opts),
     )
 
-def get_normalizer(train_dataset):
+def get_normalizer():
     """
     Returns a function that normalizes data.
     """
-    vals = torch.cat([train_dataset[i][0].flatten() for i in range(len(train_dataset))])
-    mean = vals.mean()
-    std = vals.std()
+    # The mean and std values are calculated as below: 
+    # vals = torch.cat([train_dataset[i][0].flatten() for i in range(len(train_dataset))])
+    # mean = vals.mean()
+    # std = vals.std()
+    mean = -21.5775
+    std = 16.8580
     normalizer = lambda x: (x - mean) / (std)
     return normalizer
 
