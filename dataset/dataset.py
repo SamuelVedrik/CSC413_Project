@@ -4,9 +4,14 @@ from torch.utils.data import Dataset
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import math
+import librosa
+import torch
 
 
-def build_datasets(root="genres", num_seconds_per_sample=5, transforms=None):
+def build_datasets(root="genres", num_seconds_per_sample=5, mel_opts=None):
+    
+    if mel_opts is None:
+        mel_opts = dict(n_fft=2048, n_mels=128)
     classes = [
         genre for genre in os.listdir(root) if os.path.isdir(os.path.join(root, genre))
     ]
@@ -26,14 +31,14 @@ def build_datasets(root="genres", num_seconds_per_sample=5, transforms=None):
     )
 
     return (
-        GTZANDataset(train_data, num_seconds_per_sample, transforms),
-        GTZANDataset(valid_data, num_seconds_per_sample, transforms),
-        GTZANDataset(test_data, num_seconds_per_sample, transforms),
+        GTZANDataset(train_data, num_seconds_per_sample, mel_opts),
+        GTZANDataset(valid_data, num_seconds_per_sample, mel_opts),
+        GTZANDataset(test_data, num_seconds_per_sample, mel_opts),
     )
 
 
 class GTZANDataset(Dataset):
-    def __init__(self, files_df, num_seconds_per_sample, transforms):
+    def __init__(self, files_df, num_seconds_per_sample, spectrogram_opts):
         self.files_df = files_df
         self.n = num_seconds_per_sample
 
@@ -41,22 +46,35 @@ class GTZANDataset(Dataset):
         # given that each sample is n seconds long.
         # We discard the last one in case it does not contain n seconds long of audio.
         self.samples_per_file = math.ceil(30 // num_seconds_per_sample) - 1
-        self.transforms = transforms
 
         self.classes = files_df["class"].unique()
         self.class_to_idx = {class_: idx for idx, class_ in enumerate(self.classes)}
+        
+        self.spectrogram_opts = spectrogram_opts
 
     def __getitem__(self, idx):
         file_idx, split = idx // self.samples_per_file, idx % self.samples_per_file
         path, class_ = self.files_df.iloc[file_idx]
-        audio, sample_rate = torchaudio.load(path)
-        # print(audio.shape[1])
-        audio = audio[
-            :, split * self.n * sample_rate : (split + 1) * self.n * sample_rate
-        ]
-        if self.transforms:
-            audio = self.transforms(audio)
-        return audio, self.class_to_idx[class_]
 
+        audio, sample_rate = librosa.load(path, duration=30.0)
+
+        audio = audio[
+            split * self.n * sample_rate : (split + 1) * self.n * sample_rate
+        ]
+        melspectrogram = self.convert_to_melspectrogram(audio, sample_rate, **self.spectrogram_opts)
+        melspectrogram = torch.FloatTensor(melspectrogram).unsqueeze(0)
+        return melspectrogram, self.class_to_idx[class_]
+
+        
     def __len__(self):
         return self.files_df.shape[0] * self.samples_per_file
+
+    @staticmethod
+    def convert_to_melspectrogram(audio, sample_rate, n_fft, n_mels):
+        
+        hop_length = n_fft // 2
+        melspectrogram = librosa.power_to_db(
+            librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
+        )
+        
+        return melspectrogram

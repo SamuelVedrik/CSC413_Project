@@ -56,32 +56,32 @@ class Net(nn.Module):
         return x
 
 if __name__ == "__main__":
-    transforms = MelSpectrogram(sample_rate = 22050, n_fft=800, n_mels=128)
+    mel_opts= dict(n_fft=800, n_mels=128)
+    # Set device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     train_dataset, valid_dataset, test_dataset = build_datasets(root="genres",
                                                                 num_seconds_per_sample=5,
-                                                                transforms=transforms)
+                                                                mel_opts=mel_opts)
 
 
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32)
 
     net = Net(1, len(train_dataset.classes))
     criterion = nn.CrossEntropyLoss()
-    # BCELossWithLogits (Multi Label classification)
 
     # SGD, Adam, AdamW
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 
-    # weight = weight - (lr * gradient) 
     EPOCHS = 10
     
     for epoch in range(EPOCHS):
         running_loss = 0
-        for batch in tqdm(train_dataloader):
-            X, y = batch
-            # X = X.unsqueeze(1)
-            print(X.shape)
-            y_pred = net(X)
-            loss = criterion(y_pred, y)
+        for spectrograms, target in tqdm(train_dataloader):
+            spectrograms = spectrograms.to(device)
+            target = target.to(device)
+            pred = net(spectrograms)
+            loss = criterion(pred, target)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
