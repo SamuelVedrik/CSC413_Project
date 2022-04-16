@@ -10,11 +10,13 @@ if __name__ == "__main__":
     mel_opts= dict(n_fft=800, n_mels=128)
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
+    print(f"Using device {device}")
     train_dataset, valid_dataset, test_dataset = build_datasets(root="genres",
                                                                 num_seconds_per_sample=5,
                                                                 mel_opts=mel_opts)
+    
 
+    print(f"Dataset Sizes: Train {len(train_dataset)} | Validation {len(valid_dataset)} | Test {len(test_dataset)}")
 
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32)
     validation_dataloader = DataLoader(valid_dataset, shuffle=True, batch_size=32)
