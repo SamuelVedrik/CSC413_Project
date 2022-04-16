@@ -35,6 +35,15 @@ def build_datasets(root="genres", num_seconds_per_sample=5, mel_opts=None):
         GTZANDataset(test_data, num_seconds_per_sample, mel_opts),
     )
 
+def get_normalizer(train_dataset):
+    """
+    Returns a function that normalizes data.
+    """
+    vals = torch.cat([train_dataset[i][0].flatten() for i in range(len(train_dataset))])
+    mean = vals.mean()
+    std = vals.std()
+    normalizer = lambda x: (x - mean) / (std)
+    return normalizer
 
 class GTZANDataset(Dataset):
     def __init__(self, files_df, num_seconds_per_sample, spectrogram_opts):
@@ -62,6 +71,7 @@ class GTZANDataset(Dataset):
         ]
         melspectrogram = self.convert_to_melspectrogram(audio, sample_rate, **self.spectrogram_opts)
         melspectrogram = torch.FloatTensor(melspectrogram).unsqueeze(0)
+        
         return melspectrogram, self.class_to_idx[class_]
 
         
