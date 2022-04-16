@@ -2,9 +2,9 @@ import torch
 from tqdm.auto import tqdm
 
 
-def get_accuracy(pred, target):
+def get_correct(pred, target):
     predictions = pred.argmax(axis=1)
-    return (target == predictions).sum() / target.shape[0]
+    return (target == predictions).sum()
 
     
 def validation_loop(model, validation_dataloader, criterion, epoch, verbose=False):
@@ -20,9 +20,9 @@ def validation_loop(model, validation_dataloader, criterion, epoch, verbose=Fals
             target = target.to(device)
             pred = model(spectrograms)
             loss = criterion(pred, target)
-            accuracy = get_accuracy(pred, target)
-            running_loss += loss.item()
-            running_accuracy += accuracy
+            correct = get_correct(pred, target)
+            running_loss += loss.item() * target.shape[0]
+            running_accuracy += correct
     
     avg_loss = running_loss / dataset_size
     avg_acc = running_accuracy / dataset_size
@@ -47,8 +47,8 @@ def training_loop(model, train_dataloader, criterion, optimizer, epoch, verbose=
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        running_loss += loss.item()
-        running_accuracy += get_accuracy(pred, target)
+        running_loss += (loss.item() * target.shape[0])
+        running_accuracy += get_correct(pred, target)
     
     avg_loss = running_loss / dataset_size
     avg_acc = running_accuracy / dataset_size
