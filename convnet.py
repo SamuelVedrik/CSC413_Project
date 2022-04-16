@@ -1,7 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
-from torchaudio.transforms import MelSpectrogram
 from dataset import build_datasets, GTZANDataset
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
