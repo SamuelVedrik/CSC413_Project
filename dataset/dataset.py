@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 import math
 import librosa
 import torch
+import numpy as np
 
 
 def build_datasets(root="genres", num_seconds_per_sample=5, mel_opts=None):
@@ -58,7 +59,7 @@ class GTZANDataset(Dataset):
         # We discard the last one in case it does not contain n seconds long of audio.
         self.samples_per_file = math.ceil(30 // num_seconds_per_sample) - 1
 
-        self.classes = files_df["class"].unique()
+        self.classes = np.sorted(files_df["class"].unique())
         self.class_to_idx = {class_: idx for idx, class_ in enumerate(self.classes)}
         
         self.spectrogram_opts = spectrogram_opts
