@@ -59,7 +59,7 @@ class GTZANDataset(Dataset):
         # We discard the last one in case it does not contain n seconds long of audio.
         self.samples_per_file = math.ceil(30 // num_seconds_per_sample) - 1
 
-        self.classes = np.sorted(files_df["class"].unique())
+        self.classes = np.sort(files_df["class"].unique())
         self.class_to_idx = {class_: idx for idx, class_ in enumerate(self.classes)}
         
         self.spectrogram_opts = spectrogram_opts
