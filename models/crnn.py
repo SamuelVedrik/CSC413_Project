@@ -12,7 +12,7 @@ class CRNN(BaseModel):
         
         self.avgpool = nn.AdaptiveAvgPool2d((1, 15))
         # N x 15 x 256 (Batch, sequence_len, feature_size)
-        self.gru = nn.GRU(input_size=final_layer_size, hidden_size=gru_hidden_size, batch_first=True)
+        self.gru = nn.GRU(input_size=final_layer_size, hidden_size=gru_hidden_size, num_layers=2, batch_first=True)
         self.fc = nn.Linear(in_features=gru_hidden_size, out_features=output_size)
     
     def forward(self, x):
