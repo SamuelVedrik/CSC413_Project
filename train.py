@@ -6,6 +6,21 @@ from torch.utils.data import DataLoader
 from models.crnn import CRNN
 from utils.train_utils import training_loop, validation_loop
 
+# Options for the model type
+
+# ==== CRNN ====
+ModelClass = CRNN
+MODEL_OPTS = dict(
+    layer_opts=[
+        dict(in_channels=1, out_channels=64),
+        dict(in_channels=64, out_channels=64),
+        dict(in_channels=64, out_channels=128),
+        dict(in_channels=128, out_channels=256),
+        ],
+    gru_hidden_size=30,
+    output_size=10
+)
+
 if __name__ == "__main__":
     mel_opts= dict(n_fft=800, n_mels=128)
     # Set device
@@ -22,21 +37,28 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32)
     validation_dataloader = DataLoader(valid_dataset, shuffle=True, batch_size=32)
 
-    # net = ConvNet(1, len(train_dataset.classes))
-    net = CRNN(1, len(train_dataset.classes))
+    net = ModelClass(**MODEL_OPTS)
     net = net.to(device)
+    
+    print(f"Model Type: {ModelClass.__name__}| Num parameters: {net.num_parameters():,}")
+    
     criterion = nn.CrossEntropyLoss()
 
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
-    EPOCHS = 50
+    EPOCHS = 15
     
     train_losses, train_accs, val_losses, val_accs  = [], [], [], []
     for epoch in range(EPOCHS):
         train_loss, train_acc = training_loop(net, train_dataloader, normalizer, criterion, optimizer, epoch, verbose=True)
         val_loss, val_acc = validation_loop(net, validation_dataloader, normalizer, criterion, epoch, verbose=True)
+        
+        # Saving the best model so far
+        if max(*val_acc, val_acc) == val_acc:
+            torch.save(net.state_dict(), f"{ModelClass.__name__}_{net.num_parameters()}.pth")
+        
         train_losses.append(train_loss)
         train_accs.append(train_acc)
         val_losses.append(val_loss)
         val_accs.append(val_acc)
-    
+
     

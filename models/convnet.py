@@ -1,55 +1,19 @@
 import torch.nn as nn
-import torch.nn.functional as F
-import torch
+from models.base_model import BaseModel
 
-class Layer(nn.Module):
-    def __init__(self, in_channels, out_channels):
+class ConvNet(BaseModel):
+    def __init__(self, layer_opts, output_size):
         super().__init__()
-
-        # 1 X (W x H)
-        self.conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, padding=1)
-        # 64 X (W x H)
-        self.bnorm = nn.BatchNorm2d(out_channels)
-        self.relu = nn.ReLU()
-        # 64 X (W X H)
-        self.pool = nn.MaxPool2d(kernel_size=2)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bnorm(x)
-        x = self.relu(x)
-        x = self.pool(x)
-        return x
-
-class ConvNet(nn.Module):
-    def __init__(self, input_in_channels, output):
-        super().__init__()
-        # 1 x 128 x 276
-        self.layer1 = Layer(input_in_channels, 64)
-        # 64 x 128//2 x 276//2 
-        self.layer2 = Layer(64, 64)
-        # 64 x 128//4 x 276//4
-        self.layer3 = Layer(64, 128)
-        # 128 x 128//8 x 276//8
-        self.layer4 = Layer(128, 256)
-        # 256 x 128//16 x 276//16
-        self.flat = nn.Flatten()
-
-        # Alternative 
+        
+        final_layer_size = layer_opts[-1]["out_channels"]
+        self.conv_net = self.build_conv_layers(layer_opts)
+        self.flatten = nn.Flatten()
+        
         self.avgpool = nn.AdaptiveAvgPool2d((10, 10))
-        self.fc = nn.Linear(in_features = 256 * 10 * 10, out_features=output)
-        # self.fc = nn.Linear(256 * (128//16) * (276//16), output)
+        self.fc = nn.Linear(in_features = final_layer_size * 10 * 10, out_features=output_size)
     
     def forward(self, x):
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
+        x = self.conv_net(x)
         x = self.avgpool(x)
-        x = self.flat(x)
-        x = self.fc(x)
-        return x
-    
-    @property
-    def device(self):
-        return next(self.parameters()).device
+        x = self.flatten(x)
+        return self.fc(x)
