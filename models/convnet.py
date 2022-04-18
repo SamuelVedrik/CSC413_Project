@@ -36,15 +36,16 @@ class ConvNet(nn.Module):
         self.flat = nn.Flatten()
 
         # Alternative 
-        # self.avgpool = nn.AdaptiveAvgPool2d((10, 10))
-        # self.fc = nn.Linear(in_features = 256 * 10 * 10, out_features=output)
-        self.fc = nn.Linear(256 * (128//16) * (276//16), output)
+        self.avgpool = nn.AdaptiveAvgPool2d((10, 10))
+        self.fc = nn.Linear(in_features = 256 * 10 * 10, out_features=output)
+        # self.fc = nn.Linear(256 * (128//16) * (276//16), output)
     
     def forward(self, x):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
+        x = self.avgpool(x)
         x = self.flat(x)
         x = self.fc(x)
         return x
