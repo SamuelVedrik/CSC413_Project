@@ -42,7 +42,7 @@ if __name__ == "__main__":
     net = ModelClass(**MODEL_OPTS)
     net = net.to(device)
     
-    print(f"Model Type: {ModelClass.__name__}| Num parameters: {net.num_parameters():,}")
+    print(f"Model Type: {ModelClass.__name__} | Num parameters: {net.num_parameters():,}")
     
     criterion = nn.CrossEntropyLoss()
 

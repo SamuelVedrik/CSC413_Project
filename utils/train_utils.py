@@ -30,7 +30,7 @@ def validation_loop(model, validation_dataloader, normalizer, criterion, epoch, 
     if verbose:
         print(f"{'Epoch ' if epoch else ''}{epoch} {verbose_string} loss: {avg_loss:.3f} | {verbose_string} acc {avg_acc:.3f}")
             
-    return avg_loss, avg_acc
+    return avg_loss, avg_acc.item()
     
 
 def training_loop(model, train_dataloader, normalizer, criterion, optimizer, epoch, verbose=False):
@@ -56,4 +56,4 @@ def training_loop(model, train_dataloader, normalizer, criterion, optimizer, epo
     if verbose:
         print(f"Epoch {epoch} training loss: {avg_loss:.3f} | training acc {avg_acc:.3f}")
 
-    return avg_loss, avg_acc
+    return avg_loss, avg_acc.item()
