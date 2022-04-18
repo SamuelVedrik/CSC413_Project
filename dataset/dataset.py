@@ -70,7 +70,7 @@ class GTZANDataset(Dataset):
 
         audio, sample_rate = librosa.load(path, duration=30.0)
         # Zero pad the audio
-        audio = np.concatenate([audio, np.zeros((700, ))])
+        audio = np.concatenate([audio, np.zeros((2000, ))])
         audio = audio[
             split * self.n * sample_rate : (split + 1) * self.n * sample_rate
         ]
