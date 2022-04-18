@@ -24,3 +24,6 @@ class BaseModel(ABC, nn.Module):
 
         layers = [ConvBlock(**kwargs) for kwargs in layer_opts]
         return nn.Sequential(*layers)
+    
+    def num_parameters(self):
+        return sum([param.numel() for param in self.parameters()])
