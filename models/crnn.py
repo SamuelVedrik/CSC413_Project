@@ -50,4 +50,8 @@ class CRNN(nn.Module):
         out, h_n = self.gru(x)
         out = out[:, -1, :] # Use the last sequence
         return self.fc(out)
+    
+    @property
+    def device(self):
+        return next(self.parameters()).device
         
