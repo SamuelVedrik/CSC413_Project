@@ -58,14 +58,15 @@ if __name__ == "__main__":
         train_loss, train_acc = training_loop(net, train_dataloader, normalizer, criterion, optimizer, epoch, verbose=True)
         val_loss, val_acc = validation_loop(net, validation_dataloader, normalizer, criterion, epoch, verbose=True)
         
-        # Saving the best model so far
-        if max(*val_accs, val_acc) == val_acc:
-            torch.save(net.state_dict(), f"results/{ModelClass.__name__}.pth")
         
         train_losses.append(train_loss)
         train_accs.append(train_acc)
         val_losses.append(val_loss)
         val_accs.append(val_acc)
+        
+        # Saving the best model so far
+        if max(val_accs) == val_acc:
+            torch.save(net.state_dict(), f"results/{ModelClass.__name__}.pth")
 
     test_loss, test_acc = validation_loop(net, train_dataloader, normalizer, criterion, epoch=None, test=True, verbose=True)
     plot_accuracies(train_accs, val_accs, f"results/{ModelClass.__name__}_accuracies.png")
