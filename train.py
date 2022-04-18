@@ -59,7 +59,7 @@ if __name__ == "__main__":
         val_loss, val_acc = validation_loop(net, validation_dataloader, normalizer, criterion, epoch, verbose=True)
         
         # Saving the best model so far
-        if max(*val_acc, val_acc) == val_acc:
+        if max(*val_accs, val_acc) == val_acc:
             torch.save(net.state_dict(), f"results/{ModelClass.__name__}.pth")
         
         train_losses.append(train_loss)
