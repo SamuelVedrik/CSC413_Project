@@ -21,35 +21,37 @@ class Layer(nn.Module):
         x = self.pool(x)
         return x
 
-class ConvNet(nn.Module):
-    def __init__(self, input_in_channels, output):
-        super().__init__()
-        # 1 x 128 x 276
-        self.layer1 = Layer(input_in_channels, 64)
-        # 64 x 128//2 x 276//2 
-        self.layer2 = Layer(64, 64)
-        # 64 x 128//4 x 276//4
-        self.layer3 = Layer(64, 128)
-        # 128 x 128//8 x 276//8
-        self.layer4 = Layer(128, 256)
-        # 256 x 128//16 x 276//16
-        self.flat = nn.Flatten()
 
-        # Alternative 
-        self.avgpool = nn.AdaptiveAvgPool2d((10, 10))
-        self.fc = nn.Linear(in_features = 256 * 10 * 10, out_features=output)
-        # self.fc = nn.Linear(256 * (128//16) * (276//16), output)
+class CRNN(nn.Module):
+    def __init__(self, in_channels, output):
+        super().__init__()
+        
+        self.layer1 = Layer(in_channels, 64)
+        self.layer2 = Layer(64, 64)
+        self.layer3 = Layer(64, 128)
+        self.layer4 = Layer(128, 256)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 15))
+        # N x 15 x 256 (Batch, sequence_len, feature_size)
+        self.gru = nn.GRU(input_size=256, hidden_size=30, batch_first=True)
+        self.fc = nn.Linear(in_features=30, out_features=output)
     
     def forward(self, x):
+        
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.avgpool(x)
-        x = self.flat(x)
-        x = self.fc(x)
-        return x
+        # N x 256 x 1 x 15
+        x = x.squeeze(2)
+        # N x 256 x 15
+        x = x.permute(0, 2, 1)
+        # N x 15 x 256
+        out, h_n = self.gru(x)
+        out = out[:, -1, :] # Use the last sequence
+        return self.fc(out)
     
     @property
     def device(self):
         return next(self.parameters()).device
+        

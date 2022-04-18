@@ -3,6 +3,7 @@ import torch
 from torch import nn
 from dataset.dataset import build_datasets, get_normalizer
 from torch.utils.data import DataLoader
+from models.crnn import CRNN
 from utils.train_utils import training_loop, validation_loop
 
 if __name__ == "__main__":
@@ -21,7 +22,8 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32)
     validation_dataloader = DataLoader(valid_dataset, shuffle=True, batch_size=32)
 
-    net = ConvNet(1, len(train_dataset.classes))
+    # net = ConvNet(1, len(train_dataset.classes))
+    net = CRNN(1, len(train_dataset.classes))
     net = net.to(device)
     criterion = nn.CrossEntropyLoss()
 
