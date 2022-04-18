@@ -69,7 +69,8 @@ class GTZANDataset(Dataset):
         path, class_ = self.files_df.iloc[file_idx]
 
         audio, sample_rate = librosa.load(path, duration=30.0)
-
+        # Zero pad the audio
+        audio = np.concatenate([audio, np.zeros((700, ))])
         audio = audio[
             split * self.n * sample_rate : (split + 1) * self.n * sample_rate
         ]
