@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 import math
 import librosa
 import torch
+import numpy as np
 
 
 def build_datasets(root="genres", num_seconds_per_sample=5, mel_opts=None):
@@ -35,6 +36,18 @@ def build_datasets(root="genres", num_seconds_per_sample=5, mel_opts=None):
         GTZANDataset(test_data, num_seconds_per_sample, mel_opts),
     )
 
+def get_normalizer():
+    """
+    Returns a function that normalizes data.
+    """
+    # The mean and std values are calculated as below: 
+    # vals = torch.cat([train_dataset[i][0].flatten() for i in range(len(train_dataset))])
+    # mean = vals.mean()
+    # std = vals.std()
+    mean = -21.5775
+    std = 16.8580
+    normalizer = lambda x: (x - mean) / (std)
+    return normalizer
 
 class GTZANDataset(Dataset):
     def __init__(self, files_df, num_seconds_per_sample, spectrogram_opts):
@@ -46,7 +59,7 @@ class GTZANDataset(Dataset):
         # We discard the last one in case it does not contain n seconds long of audio.
         self.samples_per_file = math.ceil(30 // num_seconds_per_sample) - 1
 
-        self.classes = files_df["class"].unique()
+        self.classes = np.sort(files_df["class"].unique())
         self.class_to_idx = {class_: idx for idx, class_ in enumerate(self.classes)}
         
         self.spectrogram_opts = spectrogram_opts
@@ -62,6 +75,7 @@ class GTZANDataset(Dataset):
         ]
         melspectrogram = self.convert_to_melspectrogram(audio, sample_rate, **self.spectrogram_opts)
         melspectrogram = torch.FloatTensor(melspectrogram).unsqueeze(0)
+        
         return melspectrogram, self.class_to_idx[class_]
 
         

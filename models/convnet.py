@@ -1,10 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
-from dataset import build_datasets, GTZANDataset
-from torch.utils.data import DataLoader
-from tqdm.auto import tqdm
-
 
 class Layer(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -25,7 +21,7 @@ class Layer(nn.Module):
         x = self.pool(x)
         return x
 
-class Net(nn.Module):
+class ConvNet(nn.Module):
     def __init__(self, input_in_channels, output):
         super().__init__()
         # 1 x 128 x 276
@@ -42,7 +38,6 @@ class Net(nn.Module):
         # Alternative 
         # self.avgpool = nn.AdaptiveAvgPool2d((10, 10))
         # self.fc = nn.Linear(in_features = 256 * 10 * 10, out_features=output)
-        
         self.fc = nn.Linear(256 * (128//16) * (276//16), output)
     
     def forward(self, x):
@@ -53,36 +48,7 @@ class Net(nn.Module):
         x = self.flat(x)
         x = self.fc(x)
         return x
-
-if __name__ == "__main__":
-    mel_opts= dict(n_fft=800, n_mels=128)
-    # Set device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    train_dataset, valid_dataset, test_dataset = build_datasets(root="genres",
-                                                                num_seconds_per_sample=5,
-                                                                mel_opts=mel_opts)
-
-
-    train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32)
-
-    net = Net(1, len(train_dataset.classes))
-    criterion = nn.CrossEntropyLoss()
-
-    # SGD, Adam, AdamW
-    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
-
-    EPOCHS = 10
-    
-    for epoch in range(EPOCHS):
-        running_loss = 0
-        for spectrograms, target in tqdm(train_dataloader):
-            spectrograms = spectrograms.to(device)
-            target = target.to(device)
-            pred = net(spectrograms)
-            loss = criterion(pred, target)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            running_loss += loss.item()
-        print(f"Epoch {epoch+1}/{EPOCHS} Loss: {running_loss / len(train_dataloader.dataset)}")
+    @property
+    def device(self):
+        return next(self.parameters()).device
