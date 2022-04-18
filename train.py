@@ -68,6 +68,7 @@ if __name__ == "__main__":
         if max(val_accs) == val_acc:
             torch.save(net.state_dict(), f"results/{ModelClass.__name__}.pth")
 
+    net.load_state_dict(torch.load(f"results/{ModelClass.__name__}.pth"))
     test_loss, test_acc = validation_loop(net, train_dataloader, normalizer, criterion, epoch=None, test=True, verbose=True)
     plot_accuracies(train_accs, val_accs, f"results/{ModelClass.__name__}_accuracies.png")
     plot_losses(train_losses, val_accs,f"results/{ModelClass.__name__}_losses.png" )

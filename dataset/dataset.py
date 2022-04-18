@@ -57,7 +57,7 @@ class GTZANDataset(Dataset):
         # Each audio sample is 30 seconds long. This is the number of samples created from one audio file
         # given that each sample is n seconds long.
         # We discard the last one in case it does not contain n seconds long of audio.
-        self.samples_per_file = math.ceil(30 // num_seconds_per_sample) - 1
+        self.samples_per_file = math.ceil(30 // num_seconds_per_sample)
 
         self.classes = np.sort(files_df["class"].unique())
         self.class_to_idx = {class_: idx for idx, class_ in enumerate(self.classes)}
