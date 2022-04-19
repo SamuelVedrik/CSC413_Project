@@ -2,7 +2,6 @@ import torch
 from torch import nn
 from dataset.dataset import build_datasets, get_normalizer
 from torch.utils.data import DataLoader
-from models.crnn import CRNN
 from utils.train_utils import training_loop, validation_loop
 from utils.visual_utils import plot_accuracies, plot_losses
 import os
@@ -29,9 +28,9 @@ if __name__ == "__main__":
     normalizer = get_normalizer(train_dataset)
     print(f"Dataset Sizes: Train {len(train_dataset)} | Validation {len(valid_dataset)} | Test {len(test_dataset)}")
 
-    train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32)
-    validation_dataloader = DataLoader(valid_dataset, shuffle=True, batch_size=32)
-    test_dataloader = DataLoader(test_dataset, shuffle=True, batch_size=32)
+    train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32, num_workers=4)
+    validation_dataloader = DataLoader(valid_dataset, shuffle=True, batch_size=32, num_workers=4)
+    test_dataloader = DataLoader(test_dataset, shuffle=True, batch_size=32, num_workers=4)
 
     net = ModelClass(**model_opts)
     net = net.to(device)
