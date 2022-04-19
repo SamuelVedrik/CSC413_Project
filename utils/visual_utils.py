@@ -31,5 +31,12 @@ def plot_confusion(conf_matrix, labels, title, save_path):
     plt.savefig(save_path)
     plt.clf()
     
+def plot_representations(logits, targets, classes, title, save_path):
+    for i in range(10):
+        curr = logits[targets == i, :]
+        plt.scatter(curr[:, 0], curr[:, 1], label=classes[i])
+    plt.title(title)
+    plt.savefig(save_path)
+    plt.clf()
     
     

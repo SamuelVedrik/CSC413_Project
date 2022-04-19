@@ -20,6 +20,22 @@ def inference_loop(model, test_dataloader, normalizer):
             targets.append(target)    
     return torch.cat(preds, dim=0).cpu(), torch.cat(targets, dim=0).cpu()
 
+def representation_loop(model, dataloader, normalizer):
+    device = model.device
+    preds = []
+    targets = []
+    model.fc = torch.nn.Identity()
+    model.eval()
+    with torch.no_grad():
+        for spectrograms, target in tqdm(dataloader):
+            spectrograms = spectrograms.to(device)
+            target = target.to(device)
+            pred = model(normalizer(spectrograms))
+            preds.append(pred)
+            targets.append(target)    
+    return torch.cat(preds, dim=0).cpu(), torch.cat(targets, dim=0).cpu()
+    
+
     
 def validation_loop(model, validation_dataloader, normalizer, criterion, epoch, test=False, verbose=False):
     device = model.device
