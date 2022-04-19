@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 plt.rcParams["figure.figsize"] = (13, 7)
 plt.style.use("seaborn")
