@@ -1,4 +1,3 @@
-from models.convnet import ConvNet
 import torch
 from torch import nn
 from dataset.dataset import build_datasets, get_normalizer
@@ -7,23 +6,17 @@ from models.crnn import CRNN
 from utils.train_utils import training_loop, validation_loop
 from utils.visual_utils import plot_accuracies, plot_losses
 import os
+import argparse
+from model_opts import OPTIONS
 
-# Options for the model type
-
-# ==== CRNN ====
-ModelClass = CRNN
-MODEL_OPTS = dict(
-    layer_opts=[
-        dict(in_channels=1, out_channels=64),
-        dict(in_channels=64, out_channels=64),
-        dict(in_channels=64, out_channels=128),
-        dict(in_channels=128, out_channels=256),
-        ],
-    gru_hidden_size=30,
-    output_size=10
-)
 
 if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser(description='Train Model')
+    parser.add_argument("model", choices=["convnet", "crnn", "mccrnn"], help="model to choose from")
+    args = parser.parse_args()
+    ModelClass, model_opts = OPTIONS[args.model]["model_class"], OPTIONS[args.model]["model_opts"]
+    
     mel_opts= dict(n_fft=800, n_mels=128)
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -40,7 +33,7 @@ if __name__ == "__main__":
     validation_dataloader = DataLoader(valid_dataset, shuffle=True, batch_size=32)
     test_dataloader = DataLoader(test_dataset, shuffle=True, batch_size=32)
 
-    net = ModelClass(**MODEL_OPTS)
+    net = ModelClass(**model_opts)
     net = net.to(device)
     
     print(f"Model Type: {ModelClass.__name__} | Num parameters: {net.num_parameters():,}")
