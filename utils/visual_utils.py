@@ -18,4 +18,10 @@ def plot_accuracies(train_acc, val_acc, save_path):
     plt.savefig(save_path)
     plt.clf()
     
+def plot_confusion(conf_matrix, save_path):
+    plt.imshow(conf_matrix)
+    plt.colorbar()
+    plt.savefig(save_path)
+    plt.clf()
+    
     
