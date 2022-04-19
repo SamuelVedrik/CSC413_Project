@@ -10,7 +10,7 @@ class CRNN(BaseModel):
         self.conv_net = self.build_conv_layers(layer_opts)
         final_layer_size = layer_opts[-1]["out_channels"]
         
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 15))
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 8))
         # N x 15 x 256 (Batch, sequence_len, feature_size)
         self.gru = nn.GRU(input_size=final_layer_size, hidden_size=gru_hidden_size, num_layers=2, batch_first=True)
         self.fc = nn.Linear(in_features=gru_hidden_size, out_features=output_size)
