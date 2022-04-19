@@ -18,7 +18,7 @@ def inference_loop(model, test_dataloader, normalizer):
             pred = model(normalizer(spectrograms))
             preds.append(pred)
             targets.append(target)    
-    return torch.cat(preds, dim=0), torch.cat(targets, dim=0)
+    return torch.cat(preds, dim=0).cpu(), torch.cat(targets, dim=0).cpu()
 
     
 def validation_loop(model, validation_dataloader, normalizer, criterion, epoch, test=False, verbose=False):
