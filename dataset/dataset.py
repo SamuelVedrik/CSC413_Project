@@ -1,11 +1,12 @@
 import os
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import math
 import librosa
 import torch
 import numpy as np
+from tqdm import tqdm
 
 
 def build_datasets(root="genres", num_seconds_per_sample=5, mel_opts=None):
@@ -40,10 +41,17 @@ def get_normalizer(train_dataset):
     """
     Returns a function that normalizes data.
     """
-
-    vals = torch.cat([train_dataset[i][0].flatten() for i in range(len(train_dataset))])
-    mean = vals.mean()
-    std = vals.std()
+    # Calculated with
+    # dataloader = DataLoader(train_dataset, batch_size=16, num_workers=4)
+    # vals = torch.cat([item[0].flatten() for item in tqdm(dataloader)])
+    # # vals = torch.cat([train_dataset[i][0].flatten() for i in tqdm(range(len(train_dataset)))])
+    # mean = vals.mean()
+    # std = vals.std()
+    
+    # Precalculated for the seed
+    mean = -21.473
+    std = 16.853
+    print(f"Mean: {mean:.3f} | Std: {std:.3f}")
     normalizer = lambda x: (x - mean) / (std)
     return normalizer
 
