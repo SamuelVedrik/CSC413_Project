@@ -5,6 +5,7 @@ from dataset.dataset import build_datasets, get_normalizer
 from torch.utils.data import DataLoader
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
 from utils.train_utils import inference_loop
+from utils.visual_utils import plot_confusion
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train Model')
@@ -29,10 +30,12 @@ if __name__ == "__main__":
     net.load_state_dict(torch.load(f"results/{ModelClass.__name__}.pth"))
     
     preds, targets = inference_loop(net, test_dataloader, normalizer)
-    confusion = confusion_matrix(targets, preds)
-    precision = precision_score(targets, preds)
-    recall = recall_score(targets, preds)
-    print(confusion)
-    print(precision)
-    print(recall)
+    confusion = confusion_matrix(targets, preds, normalize="all")
+    precision = precision_score(targets, preds, average=None)
+    recall = recall_score(targets, preds, average=None)
+    
+    plot_confusion(confusion, f"results/{ModelClass.__name__}_confusion.png")
+    
+    for class_, idx in test_dataset.class_to_idx.values():
+        print(f"{class_}: Precision: {precision[idx]:.4f} | Recall: {recall[idx]:.4f}")
     
