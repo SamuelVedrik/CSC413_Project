@@ -57,7 +57,7 @@ class GTZANDataset(Dataset):
         # Each audio sample is 30 seconds long. This is the number of samples created from one audio file
         # given that each sample is n seconds long.
         # We discard the last one in case it does not contain n seconds long of audio.
-        self.samples_per_file = math.ceil(30 // num_seconds_per_sample) - 1
+        self.samples_per_file = math.ceil(30 // num_seconds_per_sample)
 
         self.classes = np.sort(files_df["class"].unique())
         self.class_to_idx = {class_: idx for idx, class_ in enumerate(self.classes)}
@@ -69,7 +69,8 @@ class GTZANDataset(Dataset):
         path, class_ = self.files_df.iloc[file_idx]
 
         audio, sample_rate = librosa.load(path, duration=30.0)
-
+        # Zero pad the audio
+        audio = np.concatenate([audio, np.zeros((2000, ))])
         audio = audio[
             split * self.n * sample_rate : (split + 1) * self.n * sample_rate
         ]
