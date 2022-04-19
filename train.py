@@ -38,6 +38,7 @@ if __name__ == "__main__":
 
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=32)
     validation_dataloader = DataLoader(valid_dataset, shuffle=True, batch_size=32)
+    test_dataloader = DataLoader(test_dataset, shuffle=True, batch_size=32)
 
     net = ModelClass(**MODEL_OPTS)
     net = net.to(device)
@@ -69,7 +70,7 @@ if __name__ == "__main__":
             torch.save(net.state_dict(), f"results/{ModelClass.__name__}.pth")
 
     net.load_state_dict(torch.load(f"results/{ModelClass.__name__}.pth"))
-    test_loss, test_acc = validation_loop(net, train_dataloader, normalizer, criterion, epoch=None, test=True, verbose=True)
+    test_loss, test_acc = validation_loop(net, test_dataloader, normalizer, criterion, epoch=None, test=True, verbose=True)
     plot_accuracies(train_accs, val_accs, f"results/{ModelClass.__name__}_accuracies.png")
     plot_losses(train_losses, val_accs,f"results/{ModelClass.__name__}_losses.png" )
     
