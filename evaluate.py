@@ -33,9 +33,13 @@ if __name__ == "__main__":
     confusion = confusion_matrix(targets, preds, normalize="all")
     precision = precision_score(targets, preds, average=None)
     recall = recall_score(targets, preds, average=None)
+    f1 = f1_score(targets, preds, average=None)
     
-    plot_confusion(confusion, f"results/{ModelClass.__name__}_confusion.png")
+    plot_confusion(confusion, test_dataset.classes, ModelClass.__name__, f"results/{ModelClass.__name__}_confusion.png")
     
-    for class_, idx in test_dataset.class_to_idx.values():
-        print(f"{class_}: Precision: {precision[idx]:.4f} | Recall: {recall[idx]:.4f}")
+    for class_, idx in test_dataset.class_to_idx.items():
+        print(f"{class_}: Precision: {precision[idx]:.4f} | Recall: {recall[idx]:.4f} | F1: {f1[idx]:.4f}")
+    
+    print("=== Aggregate Statistics === ")
+    print(f"Precision: {precision.mean():.4f} | Recall: {recall.mean():.4f} | F1: {f1.mean():.4f}")
     

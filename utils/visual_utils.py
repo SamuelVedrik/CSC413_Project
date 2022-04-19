@@ -18,10 +18,17 @@ def plot_accuracies(train_acc, val_acc, save_path):
     plt.savefig(save_path)
     plt.clf()
     
-def plot_confusion(conf_matrix, save_path):
-    plt.imshow(conf_matrix)
+def plot_confusion(conf_matrix, labels, title, save_path):
+    plt.imshow(conf_matrix, cmap="Blues")
     plt.colorbar()
+    plt.xticks(np.arange(10), labels, rotation=45)
+    plt.yticks(np.arange(10), labels, rotation=0)
+    plt.ylabel("Ground Truth")
+    plt.xlabel("Prediction")
+    plt.title(title)
+    plt.tight_layout()
     plt.savefig(save_path)
     plt.clf()
+    
     
     
