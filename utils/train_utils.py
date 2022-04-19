@@ -1,10 +1,24 @@
 import torch
-from tqdm.auto import tqdm
-
+from tqdm import tqdm
 
 def get_correct(pred, target):
     predictions = pred.argmax(axis=1)
     return (target == predictions).sum()
+
+
+def inference_loop(model, test_dataloader, normalizer):
+    device = model.device
+    preds = []
+    targets = []
+    model.eval()
+    with torch.no_grad():
+        for spectrograms, target in tqdm(test_dataloader):
+            spectrograms = spectrograms.to(device)
+            target = target.to(device)
+            pred = model(normalizer(spectrograms))
+            preds.append(pred)
+            targets.append(target)    
+    return torch.cat(preds, dim=0), torch.cat(targets, dim=0)
 
     
 def validation_loop(model, validation_dataloader, normalizer, criterion, epoch, test=False, verbose=False):
