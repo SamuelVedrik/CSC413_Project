@@ -11,8 +11,10 @@ if __name__ == "__main__":
     parser.add_argument("model", choices=["convnet", "crnn", "mccrnn"], help="model to choose from")
     args = parser.parse_args()
     ModelClass, model_opts = OPTIONS[args.model]["model_class"], OPTIONS[args.model]["model_opts"]
+    mel_opts= dict(n_fft=800, n_mels=128)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device {device}")
+    
     train_dataset, valid_dataset, test_dataset = build_datasets(root="genres",
                                                                 num_seconds_per_sample=5,
                                                                 mel_opts=mel_opts)
