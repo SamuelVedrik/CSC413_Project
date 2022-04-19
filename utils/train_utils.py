@@ -16,7 +16,7 @@ def inference_loop(model, test_dataloader, normalizer):
             spectrograms = spectrograms.to(device)
             target = target.to(device)
             pred = model(normalizer(spectrograms))
-            preds.append(pred)
+            preds.append(pred.argmax(dim=1))
             targets.append(target)    
     return torch.cat(preds, dim=0).cpu(), torch.cat(targets, dim=0).cpu()
 
